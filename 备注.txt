@@ -1,0 +1,91 @@
+init () {
+      var _self = this
+      Touchjs.on(this.touchArea, 'touchstart', function (e) {
+        // 移动开始时的函数
+        if (e.originEvent.touches.length === 1) {
+          _self.mutiTouch = false
+          _self.posLast1 = [
+            e.originEvent.touches[0].clientX,
+            e.originEvent.touches[0].clientY
+          ]
+        } else if (e.originEvent.touches.length >= 2) {
+          _self.mutiTouch = true
+          _self.posLast1 = [
+            e.originEvent.touches[0].clientX,
+            e.originEvent.touches[0].clientY
+          ]
+          _self.posLast2 = [
+            e.originEvent.touches[1].clientX,
+            e.originEvent.touches[1].clientY
+          ]
+          _self.disLast = imath.getDis(_self.posLast1, _self.posLast2)
+          _self.rotateLast = imath.getDeg(_self.posLast1, _self.posLast2)
+        } // end if
+      })
+      Touchjs.on(this.touchArea, 'touchmove', function (e) {
+        // 移动开始时的函数
+        e.preventDefault()
+        if (e.originEvent.touches.length === 1) {
+          var pos1 = [
+            e.originEvent.touches[0].clientX,
+            e.originEvent.touches[0].clientY
+          ]
+          _self.pinchmove([pos1[0] - _self.posLast1[0], pos1[1] - _self.posLast1[1]])
+          _self.posLast1[0] = pos1[0]
+          _self.posLast1[1] = pos1[1]
+          console.log('位移')
+        } else if (e.originEvent.touches.length >= 2) {
+          // eslint-disable-next-line no-redeclare
+          var pos1 = [
+            e.originEvent.touches[0].clientX,
+            e.originEvent.touches[0].clientY
+          ]
+          var pos2 = [
+            e.originEvent.touches[1].clientX,
+            e.originEvent.touches[1].clientY
+          ]
+          var dis = imath.getDis(pos1, pos2)
+
+          if (Math.abs(dis - _self.disLast) > 0.5) {
+            console.log('放大')
+            _self.pinchscale([
+              (0.025 * (dis - _self.disLast)) / Math.abs(dis - _self.disLast)
+            ])
+          } // end if
+          var rotate = imath.getDeg(pos1, pos2)
+          console.log(rotate, _self.rotateLast)
+          if (rotate !== _self.rotateLast) {
+            _self.pinchrotate([rotate - _self.rotateLast])
+            console.log('旋转')
+          }
+          _self.posLast1[0] = pos1[0]
+          _self.posLast1[1] = pos1[1]
+          _self.posLast2[0] = pos2[0]
+          _self.posLast2[1] = pos2[1]
+          _self.disLast = dis
+          _self.rotateLast = rotate
+        } // end if
+      })
+
+      Touchjs.on(this.touchArea, 'touchend', function (e) {
+        // 移动开始时的函数
+        // Touchjs.off(this.touchArea, 'touchmove')
+      })
+    },
+    pinchmove (data) {
+      this.dx += data[0]
+      this.dy += data[1]
+      this.touchArea.style.webkitTransform = 'translate3d(' + this.dx + 'px,' + this.dy + 'px,0)'
+    },
+    pinchscale (scaleOffset) {
+      // console.log(scaleOffset)
+      this.scale += scaleOffset[0]
+      this.scale = this.scale < 0.1 ? 0.1 : this.scale
+      this.scale = this.scale > 2.5 ? 2.5 : this.scale
+      this.touchAreaBox1.style.webkitTransform = 'scale(' + this.scale + ')'
+    },
+    pinchrotate (rotateOffset) {
+      // console.log(rotateOffset)
+      // this.rotate += rotateOffset[0]
+      // this.touchAreaBox1.style.webkitTransform = 'rotate(' + this.rotate + 'deg)'
+    }

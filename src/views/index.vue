@@ -1,7 +1,7 @@
 <template>
   <main id="atricle">
     <div class="touchArea" id="touchArea">
-      <div class="box"></div>
+      <div class="box box1"></div>
     </div>
   </main>
 </template>
@@ -10,7 +10,7 @@
 // import VueDragResize from 'vue-drag-resize'
 // eslint-disable-next-line no-unused-vars
 import Touchjs from 'touchjs'
-import imath from 'common/js/math'
+// import imath from 'common/js/math'
 export default {
   name: 'atricle',
 
@@ -28,99 +28,57 @@ export default {
       dy: 0,
       scale: 1,
       rotate: 0,
-      touchArea: ''
+      touchArea: '',
+      currentScale: '',
+      initialScale: 1
     }
   },
   created () {},
   mounted () {
     this.touchArea = document.getElementById('touchArea')
-    this.touchAreaBox = this.touchArea.childNodes[0]
+    this.touchArea.style.webkitTransition = 'all ease 0.05s'
+    this.touchAreaBox1 = this.touchArea.childNodes[0]
+    this.touchAreaBox2 = this.touchArea.childNodes[1]
     this.init()
   },
   methods: {
     init () {
-      var _self = this
-      Touchjs.on(this.touchArea, 'touchstart', function (e) {
-        // 移动开始时的函数
-        if (e.originEvent.touches.length === 1) {
-          _self.mutiTouch = false
-          _self.posLast1 = [
-            e.originEvent.touches[0].clientX,
-            e.originEvent.touches[0].clientY
-          ]
-        } else if (e.originEvent.touches.length >= 2) {
-          _self.mutiTouch = true
-          _self.posLast1 = [
-            e.originEvent.touches[0].clientX,
-            e.originEvent.touches[0].clientY
-          ]
-          _self.posLast2 = [
-            e.originEvent.touches[1].clientX,
-            e.originEvent.touches[1].clientY
-          ]
-          _self.disLast = imath.getDis(_self.posLast1, _self.posLast2)
-          _self.rotateLast = imath.getDeg(_self.posLast1, _self.posLast2)
-        } // end if
+      Touchjs.on(this.touchArea, 'touchstart', function (ev) {
+        ev.preventDefault()
       })
-      Touchjs.on(this.touchArea, 'touchmove', function (e) {
-        // 移动开始时的函数
-        e.preventDefault()
-        if (e.originEvent.touches.length === 1) {
-          var pos1 = [
-            e.originEvent.touches[0].clientX,
-            e.originEvent.touches[0].clientY
-          ]
-          _self.pinchmove([pos1[0] - _self.posLast1[0], pos1[1] - _self.posLast1[1]])
-          _self.posLast1[0] = pos1[0]
-          _self.posLast1[1] = pos1[1]
-        } else if (e.originEvent.touches.length >= 2) {
-          // eslint-disable-next-line no-redeclare
-          var pos1 = [
-            e.originEvent.touches[0].clientX,
-            e.originEvent.touches[0].clientY
-          ]
-          var pos2 = [
-            e.originEvent.touches[1].clientX,
-            e.originEvent.touches[1].clientY
-          ]
-          var dis = imath.getDis(pos1, pos2)
-          if (Math.abs(dis - _self.disLast) > 0.5) {
-            _self.pinchscale([
-              (0.025 * (dis - _self.disLast)) / Math.abs(dis - _self.disLast)
-            ])
-          } // end if
-          var rotate = imath.getDeg(pos1, pos2)
-          if (rotate !== _self.rotateLast) _self.pinchrotate([rotate - _self.rotateLast])
-          _self.posLast1[0] = pos1[0]
-          _self.posLast1[1] = pos1[1]
-          _self.posLast2[0] = pos2[0]
-          _self.posLast2[1] = pos2[1]
-          _self.disLast = dis
-          _self.rotateLast = rotate
-        } // end if
+      Touchjs.on(this.touchArea, 'drag', (ev) => {
+        this.dx = this.dx || 0
+        this.dy = this.dy || 0
+        console.log('当前x值为:' + this.dx + ', 当前y值为:' + this.dy + '.')
+        var offx = this.dx + ev.x + 'px'
+        var offy = this.dy + ev.y + 'px'
+        this.touchArea.style.webkitTransform = 'translate3d(' + offx + ',' + offy + ',0)'
       })
-
-      Touchjs.on(this.touchArea, 'touchend', function (e) {
-        // 移动开始时的函数
-        // Touchjs.off(this.touchArea, 'touchmove')
+      Touchjs.on(this.touchArea, 'dragend', (ev) => {
+        this.dx += ev.x
+        this.dy += ev.y
       })
-    },
-    pinchmove (data) {
-      this.dx += data[0]
-      this.dy += data[1]
-      this.touchArea.style.webkitTransform = 'translate3d(' + this.dx + 'px,' + this.dy + 'px,0)'
-    },
-    pinchscale (scaleOffset) {
-      // console.log(scaleOffset)
-      this.scale += scaleOffset[0]
-      this.scale = this.scale < 0.1 ? 0.1 : this.scale
-      this.scale = this.scale > 2.5 ? 2.5 : this.scale
-      this.touchAreaBox.style.webkitTransform = 'scale(' + this.scale + ')'
-    },
-    pinchrotate (rotateOffset) {
-      // console.log(rotateOffset)
-      this.rotate += rotateOffset[0]
-      this.touchAreaBox.style.webkitTransform = 'rotate(' + this.rotate + 'deg)'
+      // 缩放
+      Touchjs.on(this.touchArea, 'pinch', (ev) => {
+        this.currentScale = ev.scale - 1
+        console.log(this.initialScale, this.currentScale)
+        this.currentScale = this.initialScale + this.currentScale
+        this.currentScale = this.currentScale > 2.5 ? 2.5 : this.currentScale
+        this.currentScale = this.currentScale < 0.1 ? 0.1 : this.currentScale
+        // this.touchAreaBox1.style.webkitTransform = 'scale(' + this.currentScale + ')'
+        console.log('当前缩放比例为:' + this.currentScale + '.')
+      })
+      Touchjs.on(this.touchArea, 'pinchend', (ev) => {
+        this.initialScale = this.currentScale
+      })
+      // 旋转
+      Touchjs.on(this.touchArea, 'rotate', (ev) => {
+        var totalAngle = this.rotate + ev.rotation
+        if (ev.fingerStatus === 'end') {
+          this.rotate = this.rotate + ev.rotation
+        }
+        this.touchAreaBox1.style.webkitTransform = 'scale(' + this.currentScale + ') rotate(' + totalAngle + 'deg)'
+      })
     }
   }
 }
@@ -140,11 +98,14 @@ export default {
   background-color: yellowgreen;
   // margin: 100px auto;
   transform-origin: center;
+  position: relative;
   .box {
     width: 100%;
     height: 3rem;
     background-color: red;
     transform-origin: center;
+    position: absolute;
+    top: 0;left: 0;
   }
 }
 </style>
