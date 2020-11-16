@@ -18,15 +18,8 @@ export default {
 
   data () {
     return {
-      mutiTouch: null,
-      posLast1: [],
-      posLast2: [],
-      disLast: null,
-      disSt: null,
-      rotateLast: null,
       dx: 0,
       dy: 0,
-      scale: 1,
       rotate: 0,
       touchArea: '',
       currentScale: '',
@@ -49,7 +42,7 @@ export default {
       Touchjs.on(this.touchArea, 'drag', (ev) => {
         this.dx = this.dx || 0
         this.dy = this.dy || 0
-        console.log('当前x值为:' + this.dx + ', 当前y值为:' + this.dy + '.')
+        // console.log('当前x值为:' + this.dx + ', 当前y值为:' + this.dy + '.')
         var offx = this.dx + ev.x + 'px'
         var offy = this.dy + ev.y + 'px'
         this.touchArea.style.webkitTransform = 'translate3d(' + offx + ',' + offy + ',0)'
@@ -61,12 +54,12 @@ export default {
       // 缩放
       Touchjs.on(this.touchArea, 'pinch', (ev) => {
         this.currentScale = ev.scale - 1
-        console.log(this.initialScale, this.currentScale)
+        // console.log(this.initialScale, this.currentScale)
         this.currentScale = this.initialScale + this.currentScale
         this.currentScale = this.currentScale > 2.5 ? 2.5 : this.currentScale
         this.currentScale = this.currentScale < 0.1 ? 0.1 : this.currentScale
         // this.touchAreaBox1.style.webkitTransform = 'scale(' + this.currentScale + ')'
-        console.log('当前缩放比例为:' + this.currentScale + '.')
+        // console.log('当前缩放比例为:' + this.currentScale + '.')
       })
       Touchjs.on(this.touchArea, 'pinchend', (ev) => {
         this.initialScale = this.currentScale
@@ -101,7 +94,7 @@ export default {
   position: relative;
   .box {
     width: 100%;
-    height: 3rem;
+    height: 100%;
     background-color: red;
     transform-origin: center;
     position: absolute;

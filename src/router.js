@@ -19,21 +19,9 @@ const router = new Router({
       redirect: '/index'
     },
     {
-      path: '/login',
-      name: '登录',
-      component: loadView('login')
-    },
-    {
       path: '/refresh',
       name: 'refresh',
       component: loadView('refresh')
-    },
-    {
-      path: '/main',
-      name: 'main',
-      redirect: '/main/home',
-      component: loadView('main'),
-      children: []
     },
     {
       path: '/index',
