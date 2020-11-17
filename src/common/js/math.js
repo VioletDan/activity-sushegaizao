@@ -1,5 +1,34 @@
-const imath = function () {
+var imath = importMath()
+function importMath () {
   let math = {}
+  // 获得范围内随机整数
+  math.randomRange = function (min, max) {
+    var randomNumber
+    randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
+    return randomNumber
+  } // end func
+
+  // 获得随机颜色
+  math.randomColor = function () {
+    var str = '0123456789abcdef'
+    var s = '#'
+    for (let j = 0; j < 6; j++) s += str.charAt(Math.random() * str.length)
+    return s
+  } // end func
+
+  // 随机打乱一个数组
+  math.randomSort = function (ary) {
+    if (ary && ary.length > 1) {
+      ary.sort(function () {
+        return 0.5 - Math.random()
+      })
+    }
+  } // end func
+
+  // 随机正负
+  math.randomPlus = function () {
+    return Math.random() < 0.5 ? -1 : 1
+  } // end func
   // 获得2点之间的距离
   math.getDis = function (source, target) {
     var lineX = target[0] - source[0]
@@ -27,4 +56,4 @@ const imath = function () {
   return math
 }
 
-module.exports = imath()
+export default imath

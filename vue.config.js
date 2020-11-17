@@ -5,6 +5,9 @@ function resolve (dir) {
 }
 
 module.exports = {
+  lintOnSave: true,
+  publicPath: process.env.NODE_ENV === 'development' ? '/' : './',
+  outputDir: 'activity-dream',
   devServer: {
     overlay: {
       warnings: true,
@@ -22,12 +25,15 @@ module.exports = {
     }
   },
   chainWebpack: config => {
+    config.plugin('html').tap(args => {
+      args[0].title = '测试'
+      return args
+    })
     config.resolve.alias
       .set('@', resolve('src'))
       .set('common', resolve('src/common'))
       .set('assets', resolve('src/assets'))
       .set('components', resolve('src/components'))
-      .set('mixins', resolve('src/mixins'))
       .set('api', resolve('src/api'))
       .set('views', resolve('src/views'))
   }

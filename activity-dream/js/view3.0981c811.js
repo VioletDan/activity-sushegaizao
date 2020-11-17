@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["view3"],{fe57:function(e,n,r){"use strict";r.r(n);r("a481");var t,u,o={name:"refresh",beforeRouteEnter:function(e,n,r){r(function(n){n.$router.replace({path:e.params.redirect})})},render:function(e){return e()}},a=o,c=r("2877"),i=Object(c["a"])(a,t,u,!1,null,null,null);n["default"]=i.exports}}]);
+//# sourceMappingURL=view3.0981c811.js.map

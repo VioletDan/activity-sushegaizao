@@ -11,7 +11,7 @@ function loadView (view, view2) {
 }
 
 const router = new Router({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes: [
     {
