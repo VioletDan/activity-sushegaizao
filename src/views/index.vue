@@ -12,9 +12,10 @@
     <section class="page home" id="home" v-show="isHome">
       <div class="touchBox">
         <img :src="selectImgObj.bg" alt="" class="tbg" />
-        <div class="roleBox">
-          <img :src="selectImgObj.model" alt=""/>
-          <img :src="selectImgObj.role" alt=""/>
+        <div class="roleBox active" ref="roleBox" v-show="this.selectImgObj.isRole">
+          <img :src="selectImgObj.model" alt="" class="img"/>
+          <img :src="selectImgObj.role" alt="" class="img"/>
+          <img src="@/assets/close.png" alt="" class="btnClose" @click.="btnCloseClick(1)"/>
         </div>
       </div>
       <g-pannel @onItemClick="onItemClick"></g-pannel>
@@ -32,9 +33,11 @@
 
 <script>
 import Touchjs from 'touchjs'
+// eslint-disable-next-line no-unused-vars
 import Mock from 'mockjs'
 import { mapState, mapMutations } from 'vuex'
 import imath from 'common/js/math'
+import icom from 'common/js/com'
 export default {
   name: 'atricle',
 
@@ -52,6 +55,14 @@ export default {
       selectImgObj: {
         bg: require('@/assets/bg/p1.png'),
         role: '',
+        roleInit: {
+          dx: 0,
+          dy: 0,
+          rotate: 0,
+          currentScale: '',
+          initialScale: 1
+        },
+        isRole: false,
         model: '',
         life: [],
         hobby: []
@@ -63,6 +74,8 @@ export default {
   },
   created () {},
   mounted () {
+    icom.init()
+    this.roleBox = this.$refs.roleBox
     // this.touchArea = document.getElementById('touchArea')
     // this.touchArea.style.webkitTransition = 'all ease 0.05s'
     // this.touchAreaBox1 = this.touchArea.childNodes[0]
@@ -70,55 +83,68 @@ export default {
     // this.init()
   },
   methods: {
-    init () {
-      Touchjs.on(this.touchArea, 'touchstart', function (ev) {
+    commonTouch (dom, type) {
+      let obj = this.selectImgObj.roleInit
+
+      Touchjs.on(dom, 'touchstart', function (ev) {
+        console.log(ev, '=======================')
         ev.preventDefault()
       })
-      Touchjs.on(this.touchArea, 'drag', ev => {
-        this.dx = this.dx || 0
-        this.dy = this.dy || 0
-        // console.log('当前x值为:' + this.dx + ', 当前y值为:' + this.dy + '.')
-        var offx = this.dx + ev.x + 'px'
-        var offy = this.dy + ev.y + 'px'
-        this.touchArea.style.webkitTransform =
+      Touchjs.on(dom, 'drag', ev => {
+        let offx, offy
+        if (type === 1) {
+          obj.dx = obj.dx || 0
+          obj.dy = obj.dy || 0
+          offx = obj.dx + ev.x + 'px'
+          offy = obj.dy + ev.y + 'px'
+        }
+        dom.style.webkitTransform =
           'translate3d(' + offx + ',' + offy + ',0)'
       })
-      Touchjs.on(this.touchArea, 'dragend', ev => {
-        this.dx += ev.x
-        this.dy += ev.y
+      Touchjs.on(dom, 'dragend', ev => {
+        if (type === 1) {
+          obj.dx += ev.x
+          obj.dy += ev.y
+        }
       })
       // 缩放
-      Touchjs.on(this.touchArea, 'pinch', ev => {
-        this.currentScale = ev.scale - 1
-        // console.log(this.initialScale, this.currentScale)
-        this.currentScale = this.initialScale + this.currentScale
-        this.currentScale = this.currentScale > 2.5 ? 2.5 : this.currentScale
-        this.currentScale = this.currentScale < 0.1 ? 0.1 : this.currentScale
-        // this.touchAreaBox1.style.webkitTransform = 'scale(' + this.currentScale + ')'
-        // console.log('当前缩放比例为:' + this.currentScale + '.')
+      Touchjs.on(dom, 'pinch', ev => {
+        if (type === 1) {
+          obj.currentScale = ev.scale - 1
+          obj.currentScale = obj.initialScale + obj.currentScale
+          obj.currentScale = obj.currentScale > 2.5 ? 2.5 : obj.currentScale
+          obj.currentScale = obj.currentScale < 0.1 ? 0.1 : obj.currentScale
+        }
       })
-      Touchjs.on(this.touchArea, 'pinchend', ev => {
-        this.initialScale = this.currentScale
+      Touchjs.on(dom, 'pinchend', ev => {
+        if (type === 1) {
+          obj.initialScale = obj.currentScale
+        }
       })
       // 旋转
-      Touchjs.on(this.touchArea, 'rotate', ev => {
-        var totalAngle = this.rotate + ev.rotation
-        if (ev.fingerStatus === 'end') {
-          this.rotate = this.rotate + ev.rotation
+      Touchjs.on(dom, 'rotate', ev => {
+        if (type === 1) {
+          var totalAngle = obj.rotate + ev.rotation
+          if (ev.fingerStatus === 'end') {
+            obj.rotate = obj.rotate + ev.rotation
+          }
+          dom.style.webkitTransform =
+          'scale(' + obj.currentScale + ') rotate(' + totalAngle + 'deg)'
         }
-        this.touchAreaBox1.style.webkitTransform =
-          'scale(' + this.currentScale + ') rotate(' + totalAngle + 'deg)'
       })
-
-      var userInfo = Mock.mock({
-        Name: Mock.Random.first(),
-        avatar: Mock.Random.dataImage('132x132', 'avatar'),
-        age: Mock.Random.natural(20, 40)
-      })
-      this.STOREchangeUserInfo(userInfo)
     },
     onComplete (val) {
       if (val) {
+      }
+    },
+    btnCloseClick (val) {
+      console.log(val)
+      switch (val) {
+        case 1:
+          this.selectImgObj.isRole = false
+          this.selectImgObj.role = ''
+          this.selectImgObj.model = ''
+          break
       }
     },
     btnStartClick () {
@@ -128,21 +154,36 @@ export default {
       var num = imath.randomRange(1, 12)
       switch (val.typeIndex) {
         case 0:
-          this.selectImgObj.bg = require(`@/assets/bg/p${(val.currentSmallItemIndex + 1)}.png`)
+          this.selectImgObj.bg = require(`@/assets/bg/p${val.currentSmallItemIndex +
+            1}.png`)
           break
         case 1:
-          this.selectImgObj.role = require(`@/assets/role/p${(val.currentSmallItemIndex + 1)}.png`)
-          if (!this.selectImgObj.model) this.selectImgObj.model = require(`@/assets/model/p${num}.png`)
+          this.selectImgObj.role = require(`@/assets/role/p${val.currentSmallItemIndex +
+            1}.png`)
+          this.selectImgObj.isRole = true
+          if (!this.selectImgObj.model) {
+            this.selectImgObj.model = require(`@/assets/model/p${num}.png`)
+            this.commonTouch(this.roleBox, 1)
+          }
           break
         case 2:
-          this.selectImgObj.model = require(`@/assets/model/p${(val.currentSmallItemIndex + 1)}.png`)
-          if (!this.selectImgObj.role) this.selectImgObj.role = require(`@/assets/role/p${num}.png`)
+          this.selectImgObj.model = require(`@/assets/model/p${val.currentSmallItemIndex +
+            1}.png`)
+          this.selectImgObj.isRole = true
+          if (!this.selectImgObj.role) {
+            this.selectImgObj.role = require(`@/assets/role/p${num}.png`)
+            this.commonTouch(this.roleBox, 1)
+          }
           break
         case 3:
-          this.selectImgObj.life.push(require(`@/assets/life/p${(val.currentSmallItemIndex + 1)}.png`))
+          this.selectImgObj.life.push(
+            require(`@/assets/life/p${val.currentSmallItemIndex + 1}.png`)
+          )
           break
         case 4:
-          this.selectImgObj.hobby.push(require(`@/assets/hobby/p${(val.currentSmallItemIndex + 1)}.png`))
+          this.selectImgObj.hobby.push(
+            require(`@/assets/hobby/p${val.currentSmallItemIndex + 1}.png`)
+          )
           break
       }
       console.log(this.selectImgObj)
@@ -156,7 +197,6 @@ export default {
 #atricle {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   position: relative;
   transform-origin: 0 0;
   section.page {
@@ -196,21 +236,34 @@ export default {
         height: 100%;
         object-fit: cover;
       }
-      > .roleBox{
+      > .roleBox {
         width: 4.14rem;
         height: 7.38rem;
         position: absolute;
-        top: 10%;
+        top: 50%;
         left: 0;
         right: 0;
-        margin: auto;
-        > img{
+        margin: -3.69rem auto 0;
+        pointer-events: none;
+        transition: transform 50ms;
+        &.active {
+          border: 1px dashed #fff;
+          pointer-events: all;
+        }
+        > .img {
           width: 100%;
           height: 100%;
           position: absolute;
           top: 0;
           left: 0;
         }
+      }
+      .btnClose{
+        width: 0.48rem;
+        height: 0.48rem;
+        position: absolute;
+        top: -0.46rem;
+        right: -0.46rem;
       }
     }
   }
@@ -243,6 +296,11 @@ export default {
       top: 0;
       left: 0;
     }
+  }
+}
+#atricle.screen159,#atricle.screenNormal{
+  #home .touchBox .roleBox{
+    top: 40%;
   }
 }
 </style>

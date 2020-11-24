@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 function setRootFontSize () {
   var conf = document.body
   var baseWidth = conf.getAttribute('base-width')
