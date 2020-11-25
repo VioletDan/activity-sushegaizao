@@ -13,7 +13,7 @@ function importCom () {
       else atricle.classList.add('screen159')
     }
     document.addEventListener('touchmove', function (e) {
-      e.preventDefault()
+      // e.preventDefault()
     }, { passive: false })
   }// edn func
 
