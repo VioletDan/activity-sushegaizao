@@ -29,13 +29,19 @@
           />
         </div>
         <div class="lifeBoxList" ref="lifeBoxList" v-show="this.selectImgObj.life.length > 0">
-          <div class="lifeItem" ref="lifeItem" v-for="(item,index) in selectImgObj.life" :key="index">
-            <img :src="item.src" alt="" class="lifeItemCon" ref="lifeItemCon" />
+          <div class="lifeItem" v-for="(item,index) in selectImgObj.life" :key="index">
+            <img :src="item.src" alt="" class="lifeItemCon"/>
             <img src="@/assets/close.png" alt="" class="btnClose" @click="btnCloseClick('life',item,index)" />
           </div>
         </div>
+        <div class="lifeBoxList" ref="hobbyBoxList" v-show="this.selectImgObj.hobby.length > 0">
+          <div class="lifeItem" v-for="(item,index) in selectImgObj.hobby" :key="index">
+            <img :src="item.src" alt="" class="lifeItemCon" />
+            <img src="@/assets/close.png" alt="" class="btnClose" @click="btnCloseClick('hobby',item,index)" />
+          </div>
+        </div>
       </div>
-      <g-pannel @onItemClick="onItemClick"></g-pannel>
+      <g-pannel @onItemClick="onItemClick" @btnOverClick="btnOverClick"></g-pannel>
       <!-- <div class="userInfo">
         <div>{{ userInfo.Name }}</div>
         <img :src="userInfo.avatar" alt="" />
@@ -74,6 +80,7 @@ export default {
         bg: require('@/assets/bg/p1.png'),
         role: '',
         roleInit: {
+          isAddTouch: false,
           dx: 0,
           dy: 0,
           rotate: 0,
@@ -93,67 +100,76 @@ export default {
   created () {},
   mounted () {
     icom.init()
-    this.roleBox = this.$refs.roleBox
-    this.roleBoxCon = this.$refs.roleBoxCon
-    this.lifeBoxList = this.$refs.lifeBoxList
-    this.lifeItemArr = this.lifeBoxList.childNodes
+    this.$nextTick(() => {
+      this.roleBox = this.$refs.roleBox
+      this.roleBoxCon = this.$refs.roleBoxCon
+      this.lifeBoxList = this.$refs.lifeBoxList
+      this.hobbyBoxList = this.$refs.hobbyBoxList
+    })
   },
   methods: {
-    commonTouch (dom, dom2, type) {
-      let obj = this.selectImgObj.roleInit
-
+    commonTouch (dom, dom2, type, index) {
+      let obj
+      switch (type) {
+        case 1:
+          obj = this.selectImgObj.roleInit
+          break
+        case 2:
+          obj = this.selectImgObj.life[index]
+          break
+        case 3:
+          obj = this.selectImgObj.hobby[index]
+          break
+      }
+      console.log(obj)
       Touchjs.on(dom2, 'touchstart', (ev) => {
         dom.classList.add('active')
         ev.preventDefault()
       })
       Touchjs.on(dom2, 'drag', ev => {
         let offx, offy
-        if (type === 1) {
-          obj.dx = obj.dx || 0
-          obj.dy = obj.dy || 0
-          offx = obj.dx + ev.x + 'px'
-          offy = obj.dy + ev.y + 'px'
-        }
+        obj.dx = obj.dx || 0
+        obj.dy = obj.dy || 0
+        offx = obj.dx + ev.x + 'px'
+        offy = obj.dy + ev.y + 'px'
         dom.style.webkitTransform = 'translate3d(' + offx + ',' + offy + ',0)'
       })
       Touchjs.on(dom2, 'dragend', ev => {
-        if (type === 1) {
-          obj.dx += ev.x
-          obj.dy += ev.y
-        }
+        obj.dx += ev.x
+        obj.dy += ev.y
+        this.removeActive(dom)
       })
       // 缩放
       Touchjs.on(dom2, 'pinch', ev => {
-        if (type === 1) {
-          obj.currentScale = ev.scale - 1
-          obj.currentScale = obj.initialScale + obj.currentScale
-          obj.currentScale = obj.currentScale > 2.5 ? 2.5 : obj.currentScale
-          obj.currentScale = obj.currentScale < 0.1 ? 0.1 : obj.currentScale
-        }
+        obj.currentScale = ev.scale - 1
+        obj.currentScale = obj.initialScale + obj.currentScale
+        obj.currentScale = obj.currentScale > 2.5 ? 2.5 : obj.currentScale
+        obj.currentScale = obj.currentScale < 0.1 ? 0.1 : obj.currentScale
       })
       Touchjs.on(dom2, 'pinchend', ev => {
-        if (type === 1) {
-          obj.initialScale = obj.currentScale
-        }
+        obj.initialScale = obj.currentScale
       })
       // 旋转
       Touchjs.on(dom2, 'rotate', ev => {
-        if (type === 1) {
-          var totalAngle = obj.rotate + ev.rotation
-          if (ev.fingerStatus === 'end') {
-            obj.rotate = obj.rotate + ev.rotation
-          }
-          dom.style.webkitTransform =
-            'scale(' + obj.currentScale + ') rotate(' + totalAngle + 'deg)'
+        var totalAngle = obj.rotate + ev.rotation
+        if (ev.fingerStatus === 'end') {
+          obj.rotate = obj.rotate + ev.rotation
         }
+        dom.style.webkitTransform =
+            'scale(' + obj.currentScale + ') rotate(' + totalAngle + 'deg)'
       })
       // 结束
       Touchjs.on(dom2, 'touchend', (ev) => {
+        this.removeActive(dom)
+      })
+    },
+    removeActive (dom) {
+      if (icom.hasClass(dom, 'active')) {
         if (timer) clearTimeout(timer)
         timer = setTimeout(() => {
           dom.classList.remove('active')
-        }, 1500)
-      })
+        }, 1000)
+      }
     },
     onComplete (val) {
       if (val) {
@@ -166,6 +182,15 @@ export default {
           this.selectImgObj.isRole = false
           this.selectImgObj.role = ''
           this.selectImgObj.model = ''
+          this.roleBox.style.webkitTransform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)'
+          this.selectImgObj.roleInit = {
+            isAddTouch: true,
+            dx: 0,
+            dy: 0,
+            rotate: 0,
+            currentScale: '',
+            initialScale: 1
+          }
           break
         case 'life':
           this.selectImgObj.life.splice(index, 1)
@@ -191,7 +216,10 @@ export default {
           this.selectImgObj.isRole = true
           if (!this.selectImgObj.model) {
             this.selectImgObj.model = require(`@/assets/model/p${num}.png`)
-            this.commonTouch(this.roleBox, this.roleBoxCon, 1)
+            if (!this.selectImgObj.roleInit.isAddTouch) {
+              this.commonTouch(this.roleBox, this.roleBoxCon, 1)
+              this.selectImgObj.roleInit.isAddTouch = true
+            }
           }
           break
         case 2:
@@ -206,6 +234,7 @@ export default {
         case 3:
           this.selectImgObj.life.push(
             {
+              isAddTouch: false,
               dx: 0,
               dy: 0,
               rotate: 0,
@@ -214,7 +243,7 @@ export default {
               src: require(`@/assets/life/p${val.currentSmallItemIndex + 1}.png`)
             }
           )
-          console.log(this.lifeItemArr)
+          this.renderLifeItem(this.lifeBoxList, 'life', 2)
           break
         case 4:
           this.selectImgObj.hobby.push(
@@ -227,12 +256,26 @@ export default {
               src: require(`@/assets/hobby/p${val.currentSmallItemIndex + 1}.png`)
             }
           )
+          this.renderLifeItem(this.hobbyBoxList, 'hobby', 3)
           break
       }
-      console.log(this.selectImgObj)
+    },
+    renderLifeItem (dom, typeStr, type) {
+      this.$nextTick(() => {
+        let ItemArr = dom.childNodes
+        this.selectImgObj[typeStr].forEach((value, index) => {
+          if (!value.isAddTouch) {
+            value.isAddTouch = true
+            this.commonTouch(ItemArr[index], ItemArr[index].childNodes[0], type, index)
+          }
+        })
+      })
     },
     touchArr () {
 
+    },
+    btnOverClick (val) {
+      console.log('改造完成,合成图片', val)
     },
     ...mapMutations(['STOREchangeUserInfo'])
   }
@@ -241,10 +284,13 @@ export default {
 
 <style scoped lang="scss">
 #atricle {
+  touch-action: none;
   width: 100%;
   height: 100%;
   position: relative;
   transform-origin: 0 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
   section.page {
     width: 100%;
     height: 100%;
@@ -306,6 +352,7 @@ export default {
           top: 0;
           left: 0;
           transition: all ease 0.05s;
+          border: 1px dashed transparent;
           > .img {
             width: 100%;
             height: 100%;
@@ -328,6 +375,7 @@ export default {
           top: 0;
           left: 0;
           transition: all ease 0.05s;
+          border: 1px dashed transparent;
           &.active{
             border: 1px dashed #fff;
             > .btnClose{

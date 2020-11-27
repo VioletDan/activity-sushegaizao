@@ -3,7 +3,7 @@
     <div class="pannel" :class="[isPopup ? 'active' : '']">
       <div class="popup">
         <div class="confirm">
-          <img src="@/assets/btnOver.jpg" alt="" />
+          <img src="@/assets/btnOver.jpg" alt="" @click="btnOverClick"/>
         </div>
         <div class="container">
           <div class="icon-button icon-button-left">
@@ -209,6 +209,9 @@ export default {
         typeIndex: this.currentSmallItemIndex // 5种类型的索引
       }
       this.$emit('onItemClick', obj)
+    },
+    btnOverClick () {
+      this.$emit('btnOverClick', true)
     }
   },
   components: {}
