@@ -1,25 +1,45 @@
 <template>
   <main id="atricle">
-    <section class="page preFace" id="preFace">
-      <img src="@/assets/index.png" alt="" class="bg" />
-      <img
-        src="@/assets/btnStart.png"
-        alt=""
-        class="btnStart"
-        @click="btnStartClick"
-      />
+    <section class="page preFace" id="preFace" v-if="isPreFace">
+      <img src="@/assets/index/bg.jpg" class="bg" />
+      <img src="@/assets/index/shine.png" class="bg bg1" />
+      <div class="topBox">
+        <div class="starBox">
+          <img src="@/assets/index/star6.png" class="star6" />
+          <img src="@/assets/index/star5.png" class="star5" />
+          <img src="@/assets/index/star4.png" class="star4" />
+          <img src="@/assets/index/star3.png" class="star3" />
+          <img src="@/assets/index/star2.png" class="star2" />
+          <img src="@/assets/index/star1.png" class="star1" />
+        </div>
+        <img src="@/assets/index/top_curtain.png" class="top_curtain" />
+        <img src="@/assets/index/top_brand.png" class="top_brand" />
+        <div class="titleBox">
+          <img src="@/assets/index/title.png" class="title" />
+          <img src="@/assets/index/txt.png" class="p_txt" />
+        </div>
+      </div>
+      <div class="bottomBox">
+        <img src="@/assets/index/bottom_mountain2.png" class="bottom_mountain bottom_mountain2" />
+        <img src="@/assets/index/bottom_mountain1.png" class="bottom_mountain bottom_mountain1" />
+        <img src="@/assets/index/house.png" class="house" />
+        <img src="@/assets/index/tree.png" class="tree" />
+        <img src="@/assets/index/bottom_fence.png" class="bottom_fence" />
+        <img src="@/assets/index/btnStart.png" class="btnStart" @click="btnStartClick"/>
+        <img src="@/assets/index/btnRule.png" class="btnRule" @click="btnRuleClick"/>
+      </div>
     </section>
     <section class="page home" id="home" v-show="isHome">
       <div class="touchBox">
-        <img :src="selectImgObj.bg" alt="" class="tbg" />
+        <img :src="selectImgObj.bg" class="tbg" />
         <div
           class="roleBox"
           ref="roleBox"
           v-show="this.selectImgObj.isRole"
         >
           <div class="roleBoxCon" ref="roleBoxCon">
-            <img :src="selectImgObj.role" alt="" class="img" />
-            <img :src="selectImgObj.model" alt="" class="img" />
+            <img :src="selectImgObj.role" class="img" />
+            <img :src="selectImgObj.model" class="img" />
           </div>
           <img
             src="@/assets/close.png"
@@ -30,26 +50,21 @@
         </div>
         <div class="lifeBoxList" ref="lifeBoxList" v-show="this.selectImgObj.life.length > 0">
           <div class="lifeItem" v-for="(item,index) in selectImgObj.life" :key="index">
-            <img :src="item.src" alt="" class="lifeItemCon"/>
-            <img src="@/assets/close.png" alt="" class="btnClose" @click="btnCloseClick('life',item,index)" />
+            <img :src="item.src" class="lifeItemCon"/>
+            <img src="@/assets/close.png" class="btnClose" @click="btnCloseClick('life',item,index)" />
           </div>
         </div>
         <div class="lifeBoxList" ref="hobbyBoxList" v-show="this.selectImgObj.hobby.length > 0">
           <div class="lifeItem" v-for="(item,index) in selectImgObj.hobby" :key="index">
-            <img :src="item.src" alt="" class="lifeItemCon" />
-            <img src="@/assets/close.png" alt="" class="btnClose" @click="btnCloseClick('hobby',item,index)" />
+            <img :src="item.src" class="lifeItemCon" />
+            <img src="@/assets/close.png" class="btnClose" @click="btnCloseClick('hobby',item,index)" />
           </div>
         </div>
       </div>
       <g-pannel @onItemClick="onItemClick" @btnOverClick="btnOverClick"></g-pannel>
-      <!-- <div class="userInfo">
-        <div>{{ userInfo.Name }}</div>
-        <img :src="userInfo.avatar" alt="" />
-      </div>
-      <div class="touchArea" id="touchArea">
-        <div class="box box1"></div>
-      </div> -->
     </section>
+    <g-slow ref="slowBox"></g-slow>
+    <g-rule ref="ruleBox"></g-rule>
     <g-loading @onComplete="onComplete"></g-loading>
   </main>
 </template>
@@ -70,6 +85,7 @@ export default {
   data () {
     return {
       isHome: false,
+      isPreFace: false,
       dx: 0,
       dy: 0,
       rotate: 0,
@@ -172,8 +188,8 @@ export default {
       }
     },
     onComplete (val) {
-      if (val) {
-      }
+      this.isPreFace = val
+      this.$refs.slowBox.leafOn()
     },
     btnCloseClick (val, item, index) {
       if (timer) clearTimeout(timer) // 清除定时器
@@ -202,7 +218,12 @@ export default {
     },
     btnStartClick () {
       this.isHome = true
+      this.$refs.slowBox.leafOff()
     },
+    btnRuleClick () {
+      this.$refs.ruleBox.open()
+    },
+    // 雪花关闭
     onItemClick (val) {
       var num = imath.randomRange(1, 12)
       switch (val.typeIndex) {
@@ -299,21 +320,140 @@ export default {
     left: 0;
     transition: display 300ms;
     background-color: #fff;
+    z-index: 1;
   }
   #preFace {
     .bg {
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-    .btnStart {
-      width: 3.04rem;
-      height: 0.95rem;
       position: absolute;
-      bottom: 1.4rem;
+      top: 0;
       left: 0;
-      right: 0;
-      margin: auto;
+    }
+    .bg1{
+      animation: fade-in 1s linear both;
+    }
+    .topBox{
+      width: 100%;
+      height: 3.5rem;
+      position: relative;
+      z-index: 1;
+      .top_curtain{
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        animation:fade-in 1.2s cubic-bezier(.39,.575,.565,1.000) both;
+      }
+      .top_brand{
+        width: 1.43rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: center top;
+        animation:fade-in 1.2s cubic-bezier(.39,.575,.565,1.000) both,swing3 3s 1.5s alternate infinite linear;
+      }
+      .titleBox{
+        width: 100%;
+        position: absolute;
+        top: 3.2rem;
+        left: 0;
+        .title{
+          width: 5.94rem;
+          margin: 0 auto;
+          animation:swirl-in-fwd .6s 0.8s ease-out both;
+        }
+        .p_txt{
+          width: 5.06rem;
+          margin: 0 auto;
+          animation:slide-in-bottom .6s 0.8s cubic-bezier(.25,.46,.45,.94) both;
+        }
+      }
+      .starBox{
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        >img{
+          position: absolute;
+          left: 0;
+          transform-origin: center top;
+        }
+        .star6{
+          width: 0.25rem;
+          left:0.55rem;
+          animation:slide-in-top 1s 0.2s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2s alternate infinite linear;
+        }
+        .star5{
+          width: 0.43rem;
+          left: 1.25rem;
+          animation:slide-in-top 1s 0.4s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.2s alternate infinite linear;
+        }
+        .star4{
+          width: 0.47rem;
+          left: 2.16rem;
+          animation:slide-in-top 1s 0.6s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.3s alternate infinite linear;
+        }
+        .star3{
+          width: 0.41rem;
+          left: 3.4rem;
+          animation:slide-in-top 1s 0.8s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2.5s alternate infinite linear;
+        }
+        .star2{
+          width: 0.44rem;
+          left: 5rem;
+          animation:slide-in-top 1s 1s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2.2s alternate infinite linear;
+        }
+        .star1{
+          width: 0.19rem;
+          left:5.95rem;
+          animation:slide-in-top 1s 1.2s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.3s alternate infinite linear;
+        }
+      }
+    }
+    .bottomBox{
+      width: 100%;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      animation: fade-in 1s linear both;
+      >img{
+        position: absolute;
+        bottom: 0;
+      }
+      .bottom_mountain{
+        width: 100%;
+        left: 0;
+      }
+      .house{
+        width: 2.3rem;
+        left: 0;
+      }
+      .tree{
+        width: 100%;
+        left: 0;
+      }
+      .bottom_fence{
+        width: 100%;
+        left: 0;
+      }
+      .btnStart {
+        width: 3.34rem;
+        height: 1.16rem;
+        bottom: 3rem;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+      .btnRule{
+        width: 1.5rem;
+        height: 0.66rem;
+        bottom: 2rem;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
     }
   }
   #home {
@@ -438,4 +578,23 @@ export default {
     top: 40%;
   }
 }
+@keyframes slide-in-top{0%{transform:translateY(-50px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes slide-in-bottom{0%{transform:translateY(50px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes fade-in{0%{opacity:0}100%{opacity:1}}
+@keyframes swing1{
+  0%{transform: rotate(0deg);}
+  50%{transform: rotate(-10deg);}
+  100%{transform: rotate(10deg);}
+}
+@keyframes swing2{
+  0%{transform: rotate(0deg);}
+  50%{transform: rotate(10deg);}
+  100%{transform: rotate(-10deg);}
+}
+@keyframes swing3{
+  0%{transform: rotate(0deg);}
+  50%{transform: rotate(5deg);}
+  100%{transform: rotate(-5deg);}
+}
+@keyframes swirl-in-fwd{0%{transform:rotate(-540deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}}
 </style>

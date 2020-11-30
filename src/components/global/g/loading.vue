@@ -1,11 +1,13 @@
 <template>
-  <div class="loadingCon" :class="[isLoading ? 'active' : '']">
+  <aside class="loadingCon" :class="{active : isLoading}">
     <div class="contv">
-      <img src="@/assets/gif.gif" alt="" class="img" />
+      <img src="@/assets/gif.gif" alt="" class="img" :style="{transform: 'translateX( '+ imgTranslate +'%)'}"/>
+      <div class="pannel">
+        <div class="inset" :style="{width: imgCount + '%'}"></div>
+      </div>
       <div class="percentNum">{{ imgCount }}%</div>
-      <div class="txt">资源加载中...</div>
     </div>
-  </div>
+  </aside>
 </template>
 
 <script>
@@ -16,6 +18,7 @@ export default {
   data () {
     return {
       imgCount: 0,
+      imgTranslate: -40,
       imgArr: [
         require('@/assets/bg/p1.png'),
         require('@/assets/bg/p1_s.png'),
@@ -116,7 +119,32 @@ export default {
         require('@/assets/404.jpg'),
         require('@/assets/btnStart.png'),
         require('@/assets/gif.gif'),
-        require('@/assets/no-net.png')
+        require('@/assets/no-net.png'),
+        require('@/assets/index/bg.jpg'),
+        require('@/assets/index/bottom_fence.png'),
+        require('@/assets/index/bottom_mountain1.png'),
+        require('@/assets/index/bottom_mountain2.png'),
+        require('@/assets/index/btnClose.png'),
+        require('@/assets/index/btnRule.png'),
+        require('@/assets/index/btnStart.png'),
+        require('@/assets/index/house.png'),
+        require('@/assets/index/icon_slow.png'),
+        require('@/assets/index/logo.png'),
+        require('@/assets/index/ruleTitle.png'),
+        require('@/assets/index/ruleTxt.png'),
+        require('@/assets/index/shine.png'),
+        require('@/assets/index/star1.png'),
+        require('@/assets/index/star2.png'),
+        require('@/assets/index/star3.png'),
+        require('@/assets/index/star4.png'),
+        require('@/assets/index/star5.png'),
+        require('@/assets/index/star6.png'),
+        require('@/assets/index/star_line.png'),
+        require('@/assets/index/title.png'),
+        require('@/assets/index/top_brand.png'),
+        require('@/assets/index/top_curtain.png'),
+        require('@/assets/index/tree.png'),
+        require('@/assets/index/txt.png')
       ],
       isLoading: true
     }
@@ -138,7 +166,6 @@ export default {
           imgCount++
           // this.imgCount = parseInt(imgCount / imgArr.length) * 100
           if (imgCount === imgArr.length) {
-            console.log('加载完毕')
             // 模拟loading
             this.load_timer()
           }
@@ -151,7 +178,8 @@ export default {
       per += imath.randomRange(1, 3)
       per = per > 100 ? 100 : per
       this.imgCount = per
-      if (per === 100) setTimeout(this.pageInit, 200)
+      this.imgTranslate = (per - 40)
+      if (per === 100) setTimeout(this.pageInit, 500)
       else setTimeout(this.load_timer, 33, per)
     }, // edn func
     pageInit () {
@@ -170,7 +198,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #fff;
+  background-color: #3c2e6c;
   opacity: 0;
   pointer-events: none;
   transition: all 300ms;
@@ -186,15 +214,27 @@ export default {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
+    .pannel{
+      width: 2.8rem;
+      height: 0.08rem;
+      border-radius: 0.1rem;
+      margin: -0.1rem auto 0.3rem;
+      overflow: hidden;
+      .inset{
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        border-radius: 0.1rem;
+        transition: all 0.3s;
+      }
+    }
     .img {
       width: 3rem;
+      transform: translateX(-40%);
     }
     .percentNum {
       font-size: 0.3rem;
-      margin-top: -0.6rem;
-    }
-    .txt {
-      font-size: 0.32rem;
+      color: #fff;
     }
   }
 }

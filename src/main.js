@@ -8,7 +8,7 @@ import imonitor from './common/js/monitor'
 import { Icon } from 'vant'
 
 // eslint-disable-next-line no-unused-vars
-import VConsole from 'common/js/vconsole'
+// import VConsole from 'common/js/vconsole'
 
 // eslint-disable-next-line no-unused-vars
 import rem from 'common/js/rem'
