@@ -212,7 +212,7 @@ export default {
     width: 100%;
     height: auto;
     position: absolute;
-    top: 50%;
+    top: 42%;
     transform: translateY(-50%);
     .pannel{
       width: 2.8rem;

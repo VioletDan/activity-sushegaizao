@@ -22,8 +22,8 @@
       <div class="bottomBox">
         <img src="@/assets/index/bottom_mountain2.png" class="bottom_mountain bottom_mountain2" />
         <img src="@/assets/index/bottom_mountain1.png" class="bottom_mountain bottom_mountain1" />
-        <img src="@/assets/index/house.png" class="house" />
         <img src="@/assets/index/tree.png" class="tree" />
+        <img src="@/assets/index/house.png" class="house" />
         <img src="@/assets/index/bottom_fence.png" class="bottom_fence" />
         <img src="@/assets/index/btnStart.png" class="btnStart" @click="btnStartClick"/>
         <img src="@/assets/index/btnRule.png" class="btnRule" @click="btnRuleClick"/>
@@ -445,6 +445,7 @@ export default {
         left: 0;
         right: 0;
         margin: auto;
+        z-index: 1;
       }
       .btnRule{
         width: 1.5rem;
@@ -453,6 +454,7 @@ export default {
         left: 0;
         right: 0;
         margin: auto;
+        z-index: 1;
       }
     }
   }
@@ -574,6 +576,10 @@ export default {
 }
 #atricle.screen159,
 #atricle.screenNormal {
+  #preFace .topBox .titleBox{
+    transform: translateZ(0) scale(0.8);
+    top: 2.4rem;
+  }
   #home .touchBox .roleBox {
     top: 40%;
   }
