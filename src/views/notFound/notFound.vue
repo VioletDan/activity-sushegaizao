@@ -5,7 +5,7 @@
     <h1>404</h1>
     <van-button round
                 type="info"
-                @click="$router.push('/index')">返回首页</van-button>
+                @click="$router.replace('/index')">返回首页</van-button>
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
   <main id="atricle">
-    <section class="page preFace" id="preFace" v-if="isPreFace">
+    <section class="page preFace" id="preFacePage" v-if="isPreFace">
       <img src="@/assets/index/bg.jpg" class="bg" />
       <img src="@/assets/index/shine.png" class="bg bg1" />
       <div class="topBox">
@@ -20,23 +20,33 @@
         </div>
       </div>
       <div class="bottomBox">
-        <img src="@/assets/index/bottom_mountain2.png" class="bottom_mountain bottom_mountain2" />
-        <img src="@/assets/index/bottom_mountain1.png" class="bottom_mountain bottom_mountain1" />
+        <img
+          src="@/assets/index/bottom_mountain2.png"
+          class="bottom_mountain bottom_mountain2"
+        />
+        <img
+          src="@/assets/index/bottom_mountain1.png"
+          class="bottom_mountain bottom_mountain1"
+        />
         <img src="@/assets/index/tree.png" class="tree" />
         <img src="@/assets/index/house.png" class="house" />
         <img src="@/assets/index/bottom_fence.png" class="bottom_fence" />
-        <img src="@/assets/index/btnStart.png" class="btnStart" @click="btnStartClick"/>
-        <img src="@/assets/index/btnRule.png" class="btnRule" @click="btnRuleClick"/>
+        <img
+          src="@/assets/index/btnStart.png"
+          class="btnStart"
+          @click="btnStartClick"
+        />
+        <img
+          src="@/assets/index/btnRule.png"
+          class="btnRule"
+          @click="btnRuleClick"
+        />
       </div>
     </section>
-    <section class="page home" id="home" v-show="isHome">
-      <div class="touchBox">
+    <section class="page home" id="homePage" v-show="isHome">
+      <div class="touchBox" ref="touchBox">
         <img :src="selectImgObj.bg" class="tbg" />
-        <div
-          class="roleBox"
-          ref="roleBox"
-          v-show="this.selectImgObj.isRole"
-        >
+        <div class="roleBox" ref="roleBox" v-show="this.selectImgObj.isRole">
           <div class="roleBoxCon" ref="roleBoxCon">
             <img :src="selectImgObj.role" class="img" />
             <img :src="selectImgObj.model" class="img" />
@@ -48,20 +58,52 @@
             @click="btnCloseClick('role')"
           />
         </div>
-        <div class="lifeBoxList" ref="lifeBoxList" v-show="this.selectImgObj.life.length > 0">
-          <div class="lifeItem" v-for="(item,index) in selectImgObj.life" :key="index">
-            <img :src="item.src" class="lifeItemCon"/>
-            <img src="@/assets/close.png" class="btnClose" @click="btnCloseClick('life',item,index)" />
+        <div
+          class="lifeBoxList"
+          ref="lifeBoxList"
+          v-show="this.selectImgObj.life.length > 0"
+        >
+          <div
+            class="lifeItem"
+            v-for="(item, index) in selectImgObj.life"
+            :key="index"
+          >
+            <img :src="item.src" class="lifeItemCon" />
+            <img
+              src="@/assets/close.png"
+              class="btnClose"
+              @click="btnCloseClick('life', item, index)"
+            />
           </div>
         </div>
-        <div class="lifeBoxList" ref="hobbyBoxList" v-show="this.selectImgObj.hobby.length > 0">
-          <div class="lifeItem" v-for="(item,index) in selectImgObj.hobby" :key="index">
+        <div
+          class="lifeBoxList"
+          ref="hobbyBoxList"
+          v-show="this.selectImgObj.hobby.length > 0"
+        >
+          <div
+            class="lifeItem"
+            v-for="(item, index) in selectImgObj.hobby"
+            :key="index"
+          >
             <img :src="item.src" class="lifeItemCon" />
-            <img src="@/assets/close.png" class="btnClose" @click="btnCloseClick('hobby',item,index)" />
+            <img
+              src="@/assets/close.png"
+              class="btnClose"
+              @click="btnCloseClick('hobby', item, index)"
+            />
           </div>
         </div>
       </div>
-      <g-pannel @onItemClick="onItemClick" @btnOverClick="btnOverClick"></g-pannel>
+      <g-pannel
+        @onItemClick="onItemClick"
+        @btnOverClick="btnOverClick"
+      ></g-pannel>
+    </section>
+    <section class="page resultPage" id="resultPage" v-if="isResult">
+      <div class="canvasImgBox" ref="canvasImgBox" :style="{height: this.height + 'px',width: this.width + 'px'}">
+        <img :src="ticketData">
+      </div>
     </section>
     <g-slow ref="slowBox"></g-slow>
     <g-rule ref="ruleBox"></g-rule>
@@ -73,6 +115,8 @@
 import Touchjs from 'touchjs'
 // eslint-disable-next-line no-unused-vars
 import Mock from 'mockjs'
+// eslint-disable-next-line no-unused-vars
+import html2canvas from 'html2canvas'
 import { mapState, mapMutations } from 'vuex'
 import imath from 'common/js/math'
 import icom from 'common/js/com'
@@ -84,14 +128,13 @@ export default {
 
   data () {
     return {
-      isHome: false,
       isPreFace: false,
-      dx: 0,
-      dy: 0,
-      rotate: 0,
-      touchArea: '',
-      currentScale: '',
-      initialScale: 1,
+      isHome: false,
+      isResult: false,
+      ticketData: '', // 存放合成的base64数据
+      ticketSrc: '', // cdn路径
+      width: document.documentElement.offsetWidth,
+      height: document.documentElement.offsetHeight,
       selectImgObj: {
         bg: require('@/assets/bg/p1.png'),
         role: '',
@@ -138,7 +181,7 @@ export default {
           break
       }
       console.log(obj)
-      Touchjs.on(dom2, 'touchstart', (ev) => {
+      Touchjs.on(dom2, 'touchstart', ev => {
         dom.classList.add('active')
         ev.preventDefault()
       })
@@ -172,10 +215,10 @@ export default {
           obj.rotate = obj.rotate + ev.rotation
         }
         dom.style.webkitTransform =
-            'scale(' + obj.currentScale + ') rotate(' + totalAngle + 'deg)'
+          'scale(' + obj.currentScale + ') rotate(' + totalAngle + 'deg)'
       })
       // 结束
-      Touchjs.on(dom2, 'touchend', (ev) => {
+      Touchjs.on(dom2, 'touchend', ev => {
         this.removeActive(dom)
       })
     },
@@ -198,7 +241,8 @@ export default {
           this.selectImgObj.isRole = false
           this.selectImgObj.role = ''
           this.selectImgObj.model = ''
-          this.roleBox.style.webkitTransform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)'
+          this.roleBox.style.webkitTransform =
+            'translate3d(0, 0, 0) scale(1) rotate(0deg)'
           this.selectImgObj.roleInit = {
             isAddTouch: true,
             dx: 0,
@@ -253,30 +297,26 @@ export default {
           }
           break
         case 3:
-          this.selectImgObj.life.push(
-            {
-              isAddTouch: false,
-              dx: 0,
-              dy: 0,
-              rotate: 0,
-              currentScale: '',
-              initialScale: 1,
-              src: require(`@/assets/life/p${val.currentSmallItemIndex + 1}.png`)
-            }
-          )
+          this.selectImgObj.life.push({
+            isAddTouch: false,
+            dx: 0,
+            dy: 0,
+            rotate: 0,
+            currentScale: '',
+            initialScale: 1,
+            src: require(`@/assets/life/p${val.currentSmallItemIndex + 1}.png`)
+          })
           this.renderLifeItem(this.lifeBoxList, 'life', 2)
           break
         case 4:
-          this.selectImgObj.hobby.push(
-            {
-              dx: 0,
-              dy: 0,
-              rotate: 0,
-              currentScale: '',
-              initialScale: 1,
-              src: require(`@/assets/hobby/p${val.currentSmallItemIndex + 1}.png`)
-            }
-          )
+          this.selectImgObj.hobby.push({
+            dx: 0,
+            dy: 0,
+            rotate: 0,
+            currentScale: '',
+            initialScale: 1,
+            src: require(`@/assets/hobby/p${val.currentSmallItemIndex + 1}.png`)
+          })
           this.renderLifeItem(this.hobbyBoxList, 'hobby', 3)
           break
       }
@@ -287,16 +327,51 @@ export default {
         this.selectImgObj[typeStr].forEach((value, index) => {
           if (!value.isAddTouch) {
             value.isAddTouch = true
-            this.commonTouch(ItemArr[index], ItemArr[index].childNodes[0], type, index)
+            this.commonTouch(
+              ItemArr[index],
+              ItemArr[index].childNodes[0],
+              type,
+              index
+            )
           }
         })
       })
     },
-    touchArr () {
-
-    },
+    touchArr () {},
     btnOverClick (val) {
-      console.log('改造完成,合成图片', val)
+      this.canvasIMage()
+    },
+    canvasIMage () {
+      let that = this
+      this.$toast.loading({
+        duration: 0,
+        forbidClick: true, // 禁用背景点击
+        loadingType: 'spinner'
+      })
+      this.$nextTick(() => {
+        this.touchBox = this.$refs.touchBox
+        console.log(this.touchBox)
+        // let rect = document.documentElement.getBoundingClientRect()
+        html2canvas(this.touchBox, {
+          scrollY: 0,
+          scrollX: 0,
+          width: this.width, // 注意 下面解决当页面滚动之后生成图片出现白边问题
+          height: this.height,
+          logging: false,
+          useCORS: true,
+          dpi: window.devicePixelRatio,
+          scale: 2
+        }).then((canvas) => {
+          var base64 = canvas.toDataURL('image/jpeg')
+          that.ticketData = base64
+          var img = new Image()
+          img.onload = function () {
+            that.$toast.clear()
+            that.isResult = true
+          }
+          img.src = base64
+        })
+      })
     },
     ...mapMutations(['STOREchangeUserInfo'])
   }
@@ -322,7 +397,7 @@ export default {
     background-color: #fff;
     z-index: 1;
   }
-  #preFace {
+  #preFacePage {
     .bg {
       width: 100%;
       height: 100%;
@@ -331,110 +406,124 @@ export default {
       top: 0;
       left: 0;
     }
-    .bg1{
+    .bg1 {
       animation: fade-in 1s linear both;
     }
-    .topBox{
+    .topBox {
       width: 100%;
       height: 3.5rem;
       position: relative;
       z-index: 1;
-      .top_curtain{
+      .top_curtain {
         width: 100%;
         position: absolute;
         top: 0;
         left: 0;
-        animation:fade-in 1.2s cubic-bezier(.39,.575,.565,1.000) both;
+        animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
       }
-      .top_brand{
+      .top_brand {
         width: 1.43rem;
         position: absolute;
         top: 0;
         left: 0;
         transform-origin: center top;
-        animation:fade-in 1.2s cubic-bezier(.39,.575,.565,1.000) both,swing3 3s 1.5s alternate infinite linear;
+        animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both,
+          swing3 3s 1.5s alternate infinite linear;
       }
-      .titleBox{
+      .titleBox {
         width: 100%;
         position: absolute;
         top: 3.2rem;
         left: 0;
-        .title{
+        .title {
           width: 5.94rem;
           margin: 0 auto;
-          animation:swirl-in-fwd .6s 0.8s ease-out both;
+          animation: swirl-in-fwd 0.5s 0.4s ease-out both;
         }
-        .p_txt{
+        .p_txt {
           width: 5.06rem;
           margin: 0 auto;
-          animation:slide-in-bottom .6s 0.8s cubic-bezier(.25,.46,.45,.94) both;
+          animation: slide-in-bottom 0.5s 0.4s
+            cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
         }
       }
-      .starBox{
+      .starBox {
         width: 100%;
         position: absolute;
         top: 0;
         left: 0;
-        >img{
+        > img {
           position: absolute;
           left: 0;
           transform-origin: center top;
         }
-        .star6{
+        .star6 {
           width: 0.25rem;
-          left:0.55rem;
-          animation:slide-in-top 1s 0.2s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2s alternate infinite linear;
+          left: 0.55rem;
+          animation: slide-in-top 1s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing1 3s 2s alternate infinite linear;
         }
-        .star5{
+        .star5 {
           width: 0.43rem;
           left: 1.25rem;
-          animation:slide-in-top 1s 0.4s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.2s alternate infinite linear;
+          animation: slide-in-top 1s 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing2 3s 2.2s alternate infinite linear;
         }
-        .star4{
+        .star4 {
           width: 0.47rem;
           left: 2.16rem;
-          animation:slide-in-top 1s 0.6s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.3s alternate infinite linear;
+          animation: slide-in-top 1s 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing2 3s 2.3s alternate infinite linear;
         }
-        .star3{
+        .star3 {
           width: 0.41rem;
           left: 3.4rem;
-          animation:slide-in-top 1s 0.8s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2.5s alternate infinite linear;
+          animation: slide-in-top 1s 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing1 3s 2.5s alternate infinite linear;
         }
-        .star2{
+        .star2 {
           width: 0.44rem;
           left: 5rem;
-          animation:slide-in-top 1s 1s cubic-bezier(.25,.46,.45,.94) both,swing1 3s 2.2s alternate infinite linear;
+          animation: slide-in-top 1s 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing1 3s 2.2s alternate infinite linear;
         }
-        .star1{
+        .star1 {
           width: 0.19rem;
-          left:5.95rem;
-          animation:slide-in-top 1s 1.2s cubic-bezier(.25,.46,.45,.94) both,swing2 3s 2.3s alternate infinite linear;
+          left: 5.95rem;
+          animation: slide-in-top 1s 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+              both,
+            swing2 3s 2.3s alternate infinite linear;
         }
       }
     }
-    .bottomBox{
+    .bottomBox {
       width: 100%;
       position: absolute;
       left: 0;
       bottom: 0;
       animation: fade-in 1s linear both;
-      >img{
+      > img {
         position: absolute;
         bottom: 0;
       }
-      .bottom_mountain{
+      .bottom_mountain {
         width: 100%;
         left: 0;
       }
-      .house{
+      .house {
         width: 2.3rem;
         left: 0;
       }
-      .tree{
+      .tree {
         width: 100%;
         left: 0;
       }
-      .bottom_fence{
+      .bottom_fence {
         width: 100%;
         left: 0;
       }
@@ -447,7 +536,7 @@ export default {
         margin: auto;
         z-index: 1;
       }
-      .btnRule{
+      .btnRule {
         width: 1.5rem;
         height: 0.66rem;
         bottom: 2rem;
@@ -458,17 +547,24 @@ export default {
       }
     }
   }
-  #home {
+  #homePage {
+    animation: fade-in 0.5s linear both;
     .touchBox {
       width: 100%;
       height: 100%;
       position: absolute;
       top: 0;
       left: 0;
+      transform-origin: 0 0;
       > .tbg {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        width: 7.5rem;
+        height: 16.24rem;
+        position: absolute;
+        top:50%;
+        left: 50%;
+        margin-top: -8.12rem;
+        margin-left: -3.75rem;
+        // object-fit: cover;
       }
       > .roleBox {
         width: 4.14rem;
@@ -477,16 +573,17 @@ export default {
         top: 50%;
         left: 0;
         right: 0;
+        margin: auto;
         margin: -3.69rem auto 0;
-        transition: all ease 0.05s;
-         &.active {
-           > .roleBoxCon{
-             border: 1px dashed #fff;
-           }
-           > .btnClose{
-             display: block;
-           }
+        // transition: all ease 0.05s;
+        &.active {
+          > .roleBoxCon {
+            border: 1px dashed #fff;
           }
+          > .btnClose {
+            display: block;
+          }
+        }
         > .roleBoxCon {
           width: 100%;
           height: 100%;
@@ -504,27 +601,27 @@ export default {
           }
         }
       }
-      > .lifeBoxList{
+      > .lifeBoxList {
         width: 1.6rem;
         height: 1.6rem;
         position: absolute;
         top: 50%;
         right: 10%;
-        > .lifeItem{
+        > .lifeItem {
           width: 100%;
           height: 100%;
           position: absolute;
           top: 0;
           left: 0;
-          transition: all ease 0.05s;
+          // transition: all ease 0.05s;
           border: 1px dashed transparent;
-          &.active{
+          &.active {
             border: 1px dashed #fff;
-            > .btnClose{
-             display: block;
-           }
+            > .btnClose {
+              display: block;
+            }
           }
-          > .lifeItemCon{
+          > .lifeItemCon {
             width: 100%;
             height: 100%;
             position: absolute;
@@ -543,64 +640,100 @@ export default {
       }
     }
   }
-  .userInfo {
-    text-align: center;
-    padding-top: 0.4rem;
-    > div {
-      font-size: 0.4rem;
-      margin-bottom: 0.2rem;
-      color: #fff;
-    }
-    > img {
-      width: 1.5rem;
-      border-radius: 50%;
-    }
-  }
-  .touchArea {
-    width: 4rem;
-    height: 4rem;
-    background-color: yellowgreen;
-    margin: 2rem auto;
-    transform-origin: center;
-    position: relative;
-    .box {
+  #resultPage{
+    overflow: hidden;
+    overflow-y: auto;
+    animation: fade-in 0.3s linear both;
+    z-index: 2;
+    .canvasImgBox{
       width: 100%;
-      height: 100%;
-      background-color: red;
-      transform-origin: center;
-      position: absolute;
-      top: 0;
-      left: 0;
+      >img{
+        width: 100%;
+        height: 100%;
+        // object-fit: cover;
+      }
     }
   }
 }
 #atricle.screen159,
 #atricle.screenNormal {
-  #preFace .topBox .titleBox{
+  #preFacePage .topBox .titleBox {
     transform: translateZ(0) scale(0.8);
     top: 2.4rem;
   }
-  #home .touchBox .roleBox {
+  #homePage .touchBox .roleBox {
     top: 40%;
   }
 }
-@keyframes slide-in-top{0%{transform:translateY(-50px);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes slide-in-bottom{0%{transform:translateY(50px);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes fade-in{0%{opacity:0}100%{opacity:1}}
-@keyframes swing1{
-  0%{transform: rotate(0deg);}
-  50%{transform: rotate(-10deg);}
-  100%{transform: rotate(10deg);}
+@keyframes slide-in-top {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-@keyframes swing2{
-  0%{transform: rotate(0deg);}
-  50%{transform: rotate(10deg);}
-  100%{transform: rotate(-10deg);}
+@keyframes slide-in-bottom {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-@keyframes swing3{
-  0%{transform: rotate(0deg);}
-  50%{transform: rotate(5deg);}
-  100%{transform: rotate(-5deg);}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
-@keyframes swirl-in-fwd{0%{transform:rotate(-540deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}}
+@keyframes swing1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(10deg);
+  }
+}
+@keyframes swing2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(-10deg);
+  }
+}
+@keyframes swing3 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(-5deg);
+  }
+}
+@keyframes swirl-in-fwd {
+  0% {
+    transform: rotate(-540deg) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
 </style>

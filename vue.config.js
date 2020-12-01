@@ -26,7 +26,7 @@ module.exports = {
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
-      args[0].title = '测试'
+      args[0].title = '冬日福利大放送'
       return args
     })
     config.resolve.alias

@@ -5,7 +5,7 @@ import store from './store'
 import api from 'api'
 import filters from 'common/filter/filter'
 import imonitor from './common/js/monitor'
-import { Icon } from 'vant'
+import { Icon, Toast } from 'vant'
 
 // eslint-disable-next-line no-unused-vars
 // import VConsole from 'common/js/vconsole'
@@ -29,7 +29,7 @@ Vue.prototype.$api = api
 Vue.prototype.$code = '0000'
 Vue.config.productionTip = false
 Vue.prototype.$imonitor = imonitor
-// Vue.component('vue-drag-resize', VueDragResize)
+Vue.prototype.$toast = Toast
 Vue.use(Icon)
 
 new Vue({
